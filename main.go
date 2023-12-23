@@ -1,38 +1,57 @@
 package main
 
 import (
+	"encoding/json"
+	"fmt"
+	"io"
 	"log"
+	"os"
 
+	"github.com/DarthXibalba/Conways-Game-of-Life/game"
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
-// Implement ebiten.Game interface
-type Game struct{}
+const ConfigFilePath = "config.json"
 
-// Update advances the game state, it is called with every tick/frame.
-func (g *Game) Update() error {
-	// TODO: Write update game logic
-	return nil
+type Config struct {
+	Grid      [][]int `json:"grid"`
+	PixelSize int     `json:"pixelSize"`
 }
 
-// Draw will draw the game screen, called on every frame
-func (g *Game) Draw(screen *ebiten.Image) {
-	// TODO: Write draw on screen logic
-}
+func ReadConfig(filePath string) (Config, error) {
+	var config Config
+	file, err := os.Open(filePath)
+	if err != nil {
+		return config, err
+	}
+	defer file.Close()
 
-// Layout takes the outside size (e.g., the window size) and returns the (logical) screen size.
-func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
-	// Grid size: 100x100 (each cell is a pixel)
-	return 100, 100
+	bytes, err := io.ReadAll(file)
+	if err != nil {
+		return config, err
+	}
+
+	err = json.Unmarshal(bytes, &config)
+	return config, err
 }
 
 func main() {
-	game := &Game{}
-	// Window size: Each grid cell is displayed as a 5x5 pixel square
-	ebiten.SetWindowSize(500, 500) // 100 cells * 5 pixels each
+	cfg, err := ReadConfig(ConfigFilePath)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	thisGame := game.Game{
+		Grid: cfg.Grid,
+	}
+
+	// Window size: Each grid cell is displayed as a nxn pixel square (100 cells * n pixels each)
+	fmt.Println("Screen Width:", thisGame.Width())
+	fmt.Println("Screen Height:", thisGame.Height())
+	ebiten.SetWindowSize(thisGame.Width()*cfg.PixelSize, thisGame.Height()*cfg.PixelSize)
 	ebiten.SetWindowTitle("Conway's Game of Life")
 
-	if err := ebiten.RunGame(game); err != nil {
+	if err := ebiten.RunGame(thisGame); err != nil {
 		log.Fatal(err)
 	}
 }

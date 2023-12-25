@@ -4,7 +4,7 @@ import (
 	"errors"
 	"image/color"
 
-	"github.com/hajimehoshi/ebiten"
+	"github.com/hajimehoshi/ebiten/v2"
 )
 
 var ErrorInvalidDimensions = errors.New("game dimensions cannot be zero")
@@ -16,11 +16,11 @@ type Game struct {
 	height int
 }
 
-func NewGame(grid [][]int) (Game, error) {
+func NewGame(grid [][]int) (*Game, error) {
 	gWidth := len(grid[0])
 	gHeight := len(grid)
 	if gWidth == 0 || gHeight == 0 {
-		return Game{}, ErrorInvalidDimensions
+		return nil, ErrorInvalidDimensions
 	}
 
 	g := Game{
@@ -28,7 +28,7 @@ func NewGame(grid [][]int) (Game, error) {
 		width:  gWidth,
 		height: gHeight,
 	}
-	return g, nil
+	return &g, nil
 }
 
 func (g *Game) Height() int {

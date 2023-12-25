@@ -14,35 +14,67 @@ import (
 const ConfigFilePath = "config.json"
 
 type Config struct {
-	Grid      [][]int `json:"grid"`
-	PixelSize int     `json:"pixelSize"`
+	GridFile  string `json:"gridFile"`
+	PixelSize int    `json:"pixelSize"`
 }
 
-func ReadConfig(filePath string) (Config, error) {
-	var config Config
+type InitialGrid struct {
+	Grid [][]int `json:"grid"`
+}
+
+func ReadConfig(filePath string) (Config, InitialGrid, error) {
+	var cfg Config
+	var initGrid InitialGrid
 	file, err := os.Open(filePath)
 	if err != nil {
-		return config, err
+		return cfg, initGrid, err
 	}
 	defer file.Close()
 
 	bytes, err := io.ReadAll(file)
 	if err != nil {
-		return config, err
+		return cfg, initGrid, err
 	}
 
-	err = json.Unmarshal(bytes, &config)
-	return config, err
+	err = json.Unmarshal(bytes, &cfg)
+	if err != nil {
+		return cfg, initGrid, err
+	}
+
+	// Populate grid by reading the specified grid file
+	initGrid, err = ReadGridFile(cfg.GridFile)
+	return cfg, initGrid, err
+}
+
+func ReadGridFile(filePath string) (InitialGrid, error) {
+	var initGrid InitialGrid
+	file, err := os.Open(filePath)
+	if err != nil {
+		return initGrid, err
+	}
+	defer file.Close()
+
+	bytes, err := io.ReadAll(file)
+	if err != nil {
+		return initGrid, err
+	}
+
+	err = json.Unmarshal(bytes, &initGrid)
+	if err != nil {
+		return initGrid, err
+	}
+	return initGrid, nil
 }
 
 func main() {
-	cfg, err := ReadConfig(ConfigFilePath)
+	cfg, initGrid, err := ReadConfig(ConfigFilePath)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	thisGame := game.Game{
-		Grid: cfg.Grid,
+	thisGame, err := game.NewGame(initGrid.Grid)
+	if err != nil {
+		log.Fatal(err)
 	}
 
 	// Window size: Each grid cell is displayed as a nxn pixel square (100 cells * n pixels each)

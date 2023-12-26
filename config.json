@@ -1,5 +1,5 @@
 {
-    "gridFile": "./grids/test_100x100.json",
-    "pixelSize": 7,
-    "tickerFrequency": 5
+    "gridFile": "./grids/25x25/glider_parallel.json",
+    "pixelSize": 9,
+    "tickerFrequency": 50
 }

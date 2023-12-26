@@ -14,66 +14,66 @@ import (
 const ConfigFilePath = "config.json"
 
 type Config struct {
-	GridFile   string  `json:"gridFile"`
-	PixelSize  int     `json:"pixelSize"`
-	TickerFreq float64 `json:"tickerFrequency"`
+	GridFile string `json:"gridFile"`
 }
 
-type InitialGrid struct {
-	Grid [][]int `json:"grid"`
+type GridConfig struct {
+	Grid        [][]int `json:"grid"`
+	PixelSize   int     `json:"pixelSize"`
+	RefreshRate float64 `json:"refreshRate"`
 }
 
-func ReadConfig(filePath string) (Config, InitialGrid, error) {
+func ReadConfig(filePath string) (Config, GridConfig, error) {
 	var cfg Config
-	var initGrid InitialGrid
+	var gridConfig GridConfig
 	file, err := os.Open(filePath)
 	if err != nil {
-		return cfg, initGrid, err
+		return cfg, gridConfig, err
 	}
 	defer file.Close()
 
 	bytes, err := io.ReadAll(file)
 	if err != nil {
-		return cfg, initGrid, err
+		return cfg, gridConfig, err
 	}
 
 	err = json.Unmarshal(bytes, &cfg)
 	if err != nil {
-		return cfg, initGrid, err
+		return cfg, gridConfig, err
 	}
 
 	// Populate grid by reading the specified grid file
-	initGrid, err = ReadGridFile(cfg.GridFile)
-	return cfg, initGrid, err
+	gridConfig, err = ReadGridConfig(cfg.GridFile)
+	return cfg, gridConfig, err
 }
 
-func ReadGridFile(filePath string) (InitialGrid, error) {
-	var initGrid InitialGrid
+func ReadGridConfig(filePath string) (GridConfig, error) {
+	var gridConfig GridConfig
 	file, err := os.Open(filePath)
 	if err != nil {
-		return initGrid, err
+		return gridConfig, err
 	}
 	defer file.Close()
 
 	bytes, err := io.ReadAll(file)
 	if err != nil {
-		return initGrid, err
+		return gridConfig, err
 	}
 
-	err = json.Unmarshal(bytes, &initGrid)
+	err = json.Unmarshal(bytes, &gridConfig)
 	if err != nil {
-		return initGrid, err
+		return gridConfig, err
 	}
-	return initGrid, nil
+	return gridConfig, nil
 }
 
 func main() {
-	cfg, initGrid, err := ReadConfig(ConfigFilePath)
+	_, gridConfig, err := ReadConfig(ConfigFilePath)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	thisGame, err := game.NewGame(initGrid.Grid, cfg.TickerFreq)
+	thisGame, err := game.NewGame(gridConfig.Grid, gridConfig.RefreshRate)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -81,7 +81,7 @@ func main() {
 	// Window size: Each grid cell is displayed as a nxn pixel square (100 cells * n pixels each)
 	fmt.Println("Screen Width:", thisGame.Width())
 	fmt.Println("Screen Height:", thisGame.Height())
-	ebiten.SetWindowSize(thisGame.Width()*cfg.PixelSize, thisGame.Height()*cfg.PixelSize)
+	ebiten.SetWindowSize(thisGame.Width()*gridConfig.PixelSize, thisGame.Height()*gridConfig.PixelSize)
 	ebiten.SetWindowTitle("Conway's Game of Life")
 
 	if err := ebiten.RunGame(thisGame); err != nil {

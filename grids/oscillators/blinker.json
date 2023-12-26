@@ -1,6 +1,7 @@
 {
     "pixelSize": 25,
     "refreshRate": 1,
+    "_periodRate_": 2,
     "grid": [
         [0,0,0,0,0,0,0,0,0],
         [0,0,0,0,0,0,0,0,0],

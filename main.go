@@ -14,8 +14,9 @@ import (
 const ConfigFilePath = "config.json"
 
 type Config struct {
-	GridFile  string `json:"gridFile"`
-	PixelSize int    `json:"pixelSize"`
+	GridFile   string  `json:"gridFile"`
+	PixelSize  int     `json:"pixelSize"`
+	TickerFreq float64 `json:"tickerFrequency"`
 }
 
 type InitialGrid struct {
@@ -72,7 +73,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	thisGame, err := game.NewGame(initGrid.Grid)
+	thisGame, err := game.NewGame(initGrid.Grid, cfg.TickerFreq)
 	if err != nil {
 		log.Fatal(err)
 	}

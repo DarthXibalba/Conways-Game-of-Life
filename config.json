@@ -1,4 +1,5 @@
 {
+    "gridFile": "./grids/test_100x100.json",
     "pixelSize": 7,
-    "gridFile": "./grids/test.json"
+    "tickerFrequency": 5
 }

@@ -1,5 +1,7 @@
 package game
 
+import "time"
+
 type PixelState int
 
 const (
@@ -19,12 +21,19 @@ const (
 // Left & Right Borders are connected
 
 // Update advances the game state, it is called with every tick/frame.
+// Rule 1: Any live cell with 1 or no live neighbors dies (underpopulation)
+// Rule 2: Any live cell with 2-3 live neighbors lives on to the next generation (survival)
+// Rule 3: Any live cell with 4 or more neighbors dies (overpopulation)
+// Rule 4: Any dead cell with exactly three live neighbors becomes a live cell (reproduction)
 func (g *Game) Update() error {
-	// Rule 1: Any live cell with 1 or no live neighbors dies (underpopulation)
-	// Rule 2: Any live cell with 2-3 live neighbors lives on to the next generation (survival)
-	// Rule 3: Any live cell with 4 or more neighbors dies (overpopulation)
-	// Rule 4: Any dead cell with exactly three live neighbors becomes a live cell (reproduction)
+	// Wait until next update needs to be completed
+	now := time.Now()
+	if (now.Sub(g.lastUpdate)) < g.tickerPeriod {
+		return nil // skip updating
+	}
+
 	gridSearchUpdate(g)
+	g.lastUpdate = time.Now()
 	return nil
 }
 

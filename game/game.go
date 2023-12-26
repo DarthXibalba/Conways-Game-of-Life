@@ -2,28 +2,38 @@ package game
 
 import (
 	"errors"
+	"time"
 )
 
 var ErrorInvalidDimensions = errors.New("game dimensions cannot be zero")
 
 // Implement ebiten.Game interface
 type Game struct {
-	Grid   [][]int
-	width  int
-	height int
+	Grid         [][]int
+	width        int
+	height       int
+	ticker       *time.Ticker
+	tickerFreq   float64
+	tickerPeriod time.Duration
+	lastUpdate   time.Time
 }
 
-func NewGame(grid [][]int) (*Game, error) {
+func NewGame(grid [][]int, tickerFreq float64) (*Game, error) {
 	gWidth := len(grid[0])
 	gHeight := len(grid)
 	if gWidth == 0 || gHeight == 0 {
 		return nil, ErrorInvalidDimensions
 	}
 
+	period := time.Millisecond * time.Duration(1000.0/tickerFreq)
 	g := Game{
-		Grid:   grid,
-		width:  gWidth,
-		height: gHeight,
+		Grid:         grid,
+		width:        gWidth,
+		height:       gHeight,
+		ticker:       time.NewTicker(period),
+		tickerFreq:   tickerFreq,
+		tickerPeriod: period,
+		lastUpdate:   time.Now(),
 	}
 	return &g, nil
 }
